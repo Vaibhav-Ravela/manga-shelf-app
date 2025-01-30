@@ -16,9 +16,14 @@
     <style name="TextTheme">
         <item name="android:textColor">@color/black</item>
     </style>
-    <style name="MangaItemTitleTheme" parent="TextTheme">
-        <item name="android:textSize">18sp</item>
+    <style name="TextHeadingTheme" parent="TextTheme">
         <item name="android:textStyle">bold</item>
+    </style>
+    <style name="MangaGroupHeadingTheme" parent="TextHeadingTheme">
+        <item name="android:textSize">20sp</item>
+    </style>
+    <style name="MangaItemTitleTheme" parent="TextHeadingTheme">
+        <item name="android:textSize">18sp</item>
     </style>
     <style name="MangaItemDetailsTheme" parent="TextTheme">
         <item name="android:textSize">14sp</item>

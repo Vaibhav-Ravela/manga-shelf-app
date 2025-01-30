@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Manga Shelf</string>
+    <string name="manga_score">Score: %1$.2f</string>
+    <string name="popularity">Popularity: %1$d</string>
+    <string name="year_of_publication">Year of Publication: %1$s</string>
 </resources>
