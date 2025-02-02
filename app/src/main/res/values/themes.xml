@@ -1,9 +1,9 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Theme.MangaShelf" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryVariant">@color/black</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
@@ -16,14 +16,17 @@
     <style name="TextTheme">
         <item name="android:textColor">@color/black</item>
     </style>
-    <style name="TextHeadingTheme" parent="TextTheme">
+    <style name="BoldTextTheme" parent="TextTheme">
         <item name="android:textStyle">bold</item>
     </style>
-    <style name="HeadingTheme" parent="TextHeadingTheme">
+    <style name="HeadingTheme" parent="BoldTextTheme">
         <item name="android:textSize">20sp</item>
     </style>
-    <style name="SubHeadingTheme" parent="TextHeadingTheme">
+    <style name="SubHeadingTheme" parent="BoldTextTheme">
         <item name="android:textSize">18sp</item>
+    </style>
+    <style name="BasicBoldTheme" parent="BoldTextTheme">
+        <item name="android:textSize">14sp</item>
     </style>
     <style name="BasicTextTheme" parent="TextTheme">
         <item name="android:textSize">14sp</item>

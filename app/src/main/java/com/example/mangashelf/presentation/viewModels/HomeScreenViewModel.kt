@@ -8,6 +8,7 @@ import com.example.mangashelf.data.local.repositories.MangaDBRepository
 import com.example.mangashelf.data.remote.repositories.JsonKeeperRepository
 import com.example.mangashelf.domain.models.CurrentSortOption
 import com.example.mangashelf.domain.models.MangaItem
+import com.example.mangashelf.utils.TimeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,9 +19,11 @@ import javax.inject.Inject
 class HomeScreenViewModel @Inject constructor(
     private val jsonKeeperRepository: JsonKeeperRepository,
     private val mangaDBRepository: MangaDBRepository
-): ViewModel() {
+) : ViewModel() {
     val mangaListLiveData = MutableLiveData<List<MangaItem>>()
     var currentSortOption = CurrentSortOption.PUBLICATION_YEAR
+    val yearToIndexMap = HashMap<Int, Int>()
+    val yearSortedAdapterList = ArrayList<Any>()
 
     fun getMangaList() {
         viewModelScope.launch {
@@ -56,6 +59,24 @@ class HomeScreenViewModel @Inject constructor(
                     Log.e("HomeScreenViewModel", "Exception: ${e.printStackTrace()}")
                 }
             }
+        }
+    }
+
+    fun readAdapterList(mangaItemList: List<MangaItem>) {
+        yearSortedAdapterList.clear()
+        yearToIndexMap.clear()
+        var prevYear = TimeUtils.convertUnixToYear(mangaItemList[0].publishedChapterDate)
+        yearSortedAdapterList.add(prevYear.toInt())
+        yearToIndexMap[prevYear.toInt()] = yearSortedAdapterList.size - 1
+        yearSortedAdapterList.add(mangaItemList[0])
+        for (i in 1..<mangaItemList.size) {
+            val currentYear = TimeUtils.convertUnixToYear(mangaItemList[i].publishedChapterDate)
+            if (prevYear != currentYear) {
+                prevYear = currentYear
+                yearSortedAdapterList.add(prevYear.toInt())
+                yearToIndexMap[prevYear.toInt()] = yearSortedAdapterList.size - 1
+            }
+            yearSortedAdapterList.add(mangaItemList[i])
         }
     }
 }

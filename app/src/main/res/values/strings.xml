@@ -1,10 +1,11 @@
 <resources>
     <string name="app_name">Manga Shelf</string>
-    <string name="manga_score">Score: %1$.2f</string>
-    <string name="popularity">Popularity: %1$d</string>
-    <string name="year_of_publication">Year of Publication: %1$s</string>
-    <string name="publication_date">Published On: %1$s</string>
-    <string name="category">Category: %1$s</string>
+    <string name="manga_score">Score:\u0020</string>
+    <string name="popularity">Popularity:\u0020</string>
+    <string name="year_of">Year of</string>
+    <string name="publication">Publication:\u0020</string>
+    <string name="publication_date">Published On:\u0020</string>
+    <string name="category">Category:\u0020</string>
     <string name="sort">SORT</string>
     <string name="sort_by">Sort By</string>
     <string name="score_low_to_high">Score - Low to High</string>
@@ -12,6 +13,9 @@
     <string name="score_high_to_low">Score - High to Low</string>
     <string name="popularity_low_to_high">Popularity - Low to High</string>
     <string name="popularity_high_to_low">Popularity - High to Low</string>
-    <string name="read">read</string>
-    <string name="favorite">favorite</string>
+    <string name="unread_text">read</string>
+    <string name="unfavorite_text">favorite</string>
+    <string name="read_text">"unread</string>
+    <string name="favorite_text">unfavorite</string>
+    <string name="no_data">Oops! Something went wrong. Please check your internet or try again later.</string>
 </resources>

@@ -23,9 +23,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class HomeScreen : AppCompatActivity() {
     private lateinit var homeScreenViewModel: HomeScreenViewModel
     private lateinit var homeScreenBinding: HomeScreenBinding
-    private var currentAdapterList = mutableListOf<Any>()
-    private val yearToIndexMap = HashMap<Int, Int>()
-    private val yearSortedAdapterList = ArrayList<Any>()
     private var isProgrammaticSync = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,23 +31,54 @@ class HomeScreen : AppCompatActivity() {
         setContentView(homeScreenBinding.root)
         homeScreenViewModel = ViewModelProvider(this)[HomeScreenViewModel::class.java]
         homeScreenBinding.mangaItemsRv.layoutManager = LinearLayoutManager(this)
+        if (homeScreenViewModel.currentSortOption == CurrentSortOption.PUBLICATION_YEAR) homeScreenBinding.tabLayout.visibility =
+            View.VISIBLE
+        else homeScreenBinding.tabLayout.visibility = View.GONE
         setupOnClickListeners()
-        getMangaList()
+        homeScreenViewModel.mangaListLiveData.observe(this) {
+            homeScreenBinding.apply {
+                root.isRefreshing = false
+                progressBar.visibility = View.GONE
+                mainContent.visibility = View.VISIBLE
+                if (it.isNullOrEmpty()) {
+                    noData.visibility = View.VISIBLE
+                    mainContent.visibility = View.GONE
+                    return@observe
+                } else {
+                    noData.visibility = View.GONE
+                    mainContent.visibility = View.VISIBLE
+                }
+                homeScreenViewModel.readAdapterList(it.sortedBy { mangaItem -> mangaItem.publishedChapterDate })
+                tabLayout.removeAllTabs()
+                homeScreenViewModel.yearToIndexMap.keys.forEach { year ->
+                    homeScreenBinding.tabLayout.addTab(homeScreenBinding.tabLayout.newTab()
+                        .setText(year.toString()).apply { tag = year })
+                }
+                mangaItemsRv.adapter = MangaListAdapter(
+                    this@HomeScreen,
+                    provideAdapterList(it),
+                    homeScreenViewModel,
+                    mangaDetailedActivityResultLauncher
+                )
+            }
+        }
+        homeScreenViewModel.getMangaList()
     }
 
     private fun setupOnClickListeners() {
+        homeScreenBinding.root.setOnRefreshListener {
+            homeScreenViewModel.getMangaList()
+        }
         homeScreenBinding.tabLayout.addOnTabSelectedListener(object :
             TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                if (isProgrammaticSync) {
-                    isProgrammaticSync = false
-                    return
-                } else isProgrammaticSync = true
+                if (isProgrammaticSync) return
+                else isProgrammaticSync = true
                 (tab?.tag as? Int)?.let {
                     homeScreenBinding.mangaItemsRv.apply {
                         stopScroll()
                         (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                            yearToIndexMap.getOrDefault(it, 0), 0
+                            homeScreenViewModel.yearToIndexMap.getOrDefault(it, 0), 0
                         )
                     }
                 }
@@ -70,15 +98,20 @@ class HomeScreen : AppCompatActivity() {
                 } else isProgrammaticSync = true
                 val firstVisibleItemPosition =
                     (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                val year =
-                    when (val firstVisibleItem = yearSortedAdapterList[firstVisibleItemPosition]) {
-                        is Int -> firstVisibleItem
-                        is MangaItem -> TimeUtils.convertUnixToYear(firstVisibleItem.publishedChapterDate)
-                            .toInt()
+                val year = when (val firstVisibleItem =
+                    homeScreenViewModel.yearSortedAdapterList[firstVisibleItemPosition]) {
+                    is Int -> firstVisibleItem
+                    is MangaItem -> TimeUtils.convertUnixToYear(firstVisibleItem.publishedChapterDate)
+                        .toInt()
 
-                        else -> {}
-                    }
-                homeScreenBinding.tabLayout.getTabAt(yearToIndexMap.keys.indexOf(year))?.select()
+                    else -> {}
+                }
+                homeScreenBinding.tabLayout.getTabAt(
+                    homeScreenViewModel.yearToIndexMap.keys.indexOf(
+                        year
+                    )
+                )?.select()
+                isProgrammaticSync = false
             }
         })
         homeScreenBinding.sortBtn.setOnClickListener {
@@ -112,63 +145,20 @@ class HomeScreen : AppCompatActivity() {
         }
     }
 
-    private fun getMangaList() {
-        homeScreenViewModel.apply {
-            getMangaList()
-            mangaListLiveData.observe(this@HomeScreen) {
-                if (it.isNullOrEmpty()) return@observe
-                provideAdapterList(it)
-                homeScreenBinding.mangaItemsRv.adapter = MangaListAdapter(
-                    this@HomeScreen,
-                    currentAdapterList,
-                    homeScreenViewModel,
-                    mangaDetailedActivityResultLauncher
-                )
-            }
-        }
-    }
+    private fun provideAdapterList(mangaItemList: List<MangaItem>): MutableList<Any> {
+        return when (homeScreenViewModel.currentSortOption) {
+            CurrentSortOption.PUBLICATION_YEAR -> homeScreenViewModel.yearSortedAdapterList
+            CurrentSortOption.SCORE_LOW_TO_HIGH -> mangaItemList.sortedBy { it.score }
+                .toMutableList()
 
-    private fun readAdapterList(mangaItemList: List<MangaItem>): MutableList<Any> {
-        yearSortedAdapterList.clear()
-        yearToIndexMap.clear()
-        var prevYear = TimeUtils.convertUnixToYear(mangaItemList[0].publishedChapterDate)
-        yearSortedAdapterList.add(prevYear.toInt())
-        yearToIndexMap[prevYear.toInt()] = yearSortedAdapterList.size - 1
-        yearSortedAdapterList.add(mangaItemList[0])
-        for (i in 1..<mangaItemList.size) {
-            val currentYear = TimeUtils.convertUnixToYear(mangaItemList[i].publishedChapterDate)
-            if (prevYear != currentYear) {
-                prevYear = currentYear
-                yearSortedAdapterList.add(prevYear.toInt())
-                yearToIndexMap[prevYear.toInt()] = yearSortedAdapterList.size - 1
-            }
-            yearSortedAdapterList.add(mangaItemList[i])
-        }
-        yearToIndexMap.keys.forEach { year ->
-            homeScreenBinding.tabLayout.addTab(
-                homeScreenBinding.tabLayout.newTab().setText(year.toString()).apply { tag = year })
-        }
-        return yearSortedAdapterList
-    }
+            CurrentSortOption.SCORE_HIGH_TO_LOW -> mangaItemList.sortedByDescending { it.score }
+                .toMutableList()
 
-    private fun provideAdapterList(mangaItemList: List<MangaItem>?) {
-        mangaItemList?.let {
-            currentAdapterList = when (homeScreenViewModel.currentSortOption) {
-                CurrentSortOption.PUBLICATION_YEAR -> readAdapterList(mangaItemList.sortedBy { mangaItem -> mangaItem.publishedChapterDate })
-                CurrentSortOption.SCORE_LOW_TO_HIGH -> mangaItemList.sortedBy { it.score }
-                    .toMutableList()
+            CurrentSortOption.POPULARITY_LOW_TO_HIGH -> mangaItemList.sortedBy { it.popularity }
+                .toMutableList()
 
-                CurrentSortOption.SCORE_HIGH_TO_LOW -> mangaItemList.sortedByDescending { it.score }
-                    .toMutableList()
-
-                CurrentSortOption.POPULARITY_LOW_TO_HIGH -> mangaItemList.sortedBy { it.popularity }
-                    .toMutableList()
-
-                CurrentSortOption.POPULARITY_HIGH_TO_LOW -> mangaItemList.sortedByDescending { it.popularity }
-                    .toMutableList()
-            }
-        } ?: run {
-            currentAdapterList = emptyList<MangaItem>().toMutableList()
+            CurrentSortOption.POPULARITY_HIGH_TO_LOW -> mangaItemList.sortedByDescending { it.popularity }
+                .toMutableList()
         }
     }
 
@@ -180,7 +170,7 @@ class HomeScreen : AppCompatActivity() {
                 publicationYear,
                 scoreLowToHigh,
                 scoreHighToLow,
-                popularityHighToLow,
+                popularityLowToHigh,
                 popularityHighToLow
             )
         }
@@ -189,10 +179,10 @@ class HomeScreen : AppCompatActivity() {
                 if (i != 0) homeScreenBinding.tabLayout.visibility = View.GONE
                 else homeScreenBinding.tabLayout.visibility = View.VISIBLE
                 homeScreenViewModel.currentSortOption = CurrentSortOption.entries[i]
-                provideAdapterList(homeScreenViewModel.mangaListLiveData.value)
+                if (homeScreenViewModel.mangaListLiveData.value.isNullOrEmpty()) return@setOnClickListener
                 homeScreenBinding.mangaItemsRv.adapter = MangaListAdapter(
                     this@HomeScreen,
-                    currentAdapterList,
+                    provideAdapterList(homeScreenViewModel.mangaListLiveData.value!!),
                     homeScreenViewModel,
                     mangaDetailedActivityResultLauncher
                 )
@@ -206,7 +196,7 @@ class HomeScreen : AppCompatActivity() {
             if (it.resultCode == RESULT_OK) {
                 val position = it.data?.getIntExtra(MangaListAdapter.POSITION, -1)
                 if (position != null && position != -1) {
-                    currentAdapterList[position] =
+                    (homeScreenBinding.mangaItemsRv.adapter as MangaListAdapter).adapterList[position] =
                         it.data?.getParcelableExtra<MangaItem>(MangaDetailedActivity.MANGA_ITEM)!!
                     homeScreenBinding.mangaItemsRv.adapter?.notifyItemChanged(position)
                 }

@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.coil)
+    implementation(libs.androidx.swiperefreshlayout)
 }
 
 kapt {

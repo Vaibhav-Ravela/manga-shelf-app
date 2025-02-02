@@ -18,7 +18,7 @@ import com.example.mangashelf.utils.TimeUtils
 
 class MangaListAdapter(
     private val context: Context,
-    private val adapterList: List<Any>,
+    val adapterList: MutableList<Any>,
     private val homeScreenViewModel: HomeScreenViewModel,
     private val activityResultLauncher: ActivityResultLauncher<Intent>
 ) : RecyclerView.Adapter<ViewHolder>() {
@@ -57,26 +57,47 @@ class MangaListAdapter(
                         crossfade(true)
                     }
                     title.text = mangaItem.title
-                    score.text = context.getString(R.string.manga_score, mangaItem.score)
-                    popularity.text = context.getString(R.string.popularity, mangaItem.popularity)
-                    yearOfPublication.text = context.getString(
-                        R.string.year_of_publication,
-                        TimeUtils.convertUnixToYear(mangaItem.publishedChapterDate)
-                    )
-                    if (mangaItem.isFavorite) favoriteIcon.setImageResource(R.drawable.favorite)
-                    else favoriteIcon.setImageResource(R.drawable.not_favorite)
-                    if (mangaItem.isRead) readIcon.setImageResource(R.drawable.read)
-                    else readIcon.setImageResource(R.drawable.not_read)
+                    score.text = mangaItem.score.toString()
+                    popularity.text = mangaItem.popularity.toString()
+                    yearOfPublication.text = TimeUtils.convertUnixToYear(mangaItem.publishedChapterDate)
+                    if (mangaItem.isFavorite) {
+                        favoriteIcon.setImageResource(R.drawable.favorite)
+                        favoriteText.text = context.getString(R.string.favorite_text)
+                    }
+                    else {
+                        favoriteIcon.setImageResource(R.drawable.not_favorite)
+                        favoriteText.text = context.getString(R.string.unfavorite_text)
+                    }
+                    if (mangaItem.isRead) {
+                        readIcon.setImageResource(R.drawable.read)
+                        readText.text = context.getString(R.string.read_text)
+                    }
+                    else {
+                        readIcon.setImageResource(R.drawable.not_read)
+                        readText.text = context.getString(R.string.unread_text)
+                    }
                     favorite.setOnClickListener {
                         mangaItem.isFavorite = !mangaItem.isFavorite
-                        if (mangaItem.isFavorite) favoriteIcon.setImageResource(R.drawable.favorite)
-                        else favoriteIcon.setImageResource(R.drawable.not_favorite)
+                        if (mangaItem.isFavorite) {
+                            favoriteIcon.setImageResource(R.drawable.favorite)
+                            favoriteText.text = context.getString(R.string.favorite_text)
+                        }
+                        else {
+                            favoriteIcon.setImageResource(R.drawable.not_favorite)
+                            favoriteText.text = context.getString(R.string.unfavorite_text)
+                        }
                         homeScreenViewModel.updateFavoriteStatus(mangaItem.id, mangaItem.isFavorite)
                     }
                     read.setOnClickListener {
                         mangaItem.isRead = !mangaItem.isRead
-                        if (mangaItem.isRead) readIcon.setImageResource(R.drawable.read)
-                        else readIcon.setImageResource(R.drawable.not_read)
+                        if (mangaItem.isRead) {
+                            readIcon.setImageResource(R.drawable.read)
+                            readText.text = context.getString(R.string.read_text)
+                        }
+                        else {
+                            readIcon.setImageResource(R.drawable.not_read)
+                            readText.text = context.getString(R.string.unread_text)
+                        }
                         homeScreenViewModel.updateReadStatus(mangaItem.id, mangaItem.isRead)
                     }
                     root.setOnClickListener {

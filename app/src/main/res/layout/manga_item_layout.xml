@@ -11,45 +11,101 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <LinearLayout
+        <TextView
             android:layout_margin="10dp"
-            android:id="@+id/manga_details"
+            android:id="@+id/title"
+            android:theme="@style/SubHeadingTheme"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@id/cover_image"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:orientation="vertical">
-            <TextView
-                android:id="@+id/title"
-                android:theme="@style/SubHeadingTheme"
+            app:layout_constraintTop_toTopOf="parent" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:padding="10dp"
+            android:id="@+id/manga_details"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="200dp"
+            app:layout_constraintStart_toEndOf="@id/cover_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title"
+            app:layout_constraintBottom_toBottomOf="parent">
+            <LinearLayout
+                android:id="@+id/score_ll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
-            <TextView
-                android:id="@+id/score"
-                android:theme="@style/BasicTextTheme"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/popularity_ll">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/manga_score"
+                    android:theme="@style/BasicBoldTheme" />
+
+                <TextView
+                    android:id="@+id/score"
+                    android:theme="@style/BasicTextTheme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/popularity_ll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
-            <TextView
-                android:id="@+id/popularity"
-                android:theme="@style/BasicTextTheme"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/score_ll"
+                app:layout_constraintBottom_toTopOf="@id/year_ll">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/popularity"
+                    android:theme="@style/BasicBoldTheme"/>
+                <TextView
+                    android:id="@+id/popularity"
+                    android:theme="@style/BasicTextTheme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/year_ll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
-            <TextView
-                android:id="@+id/year_of_publication"
-                android:theme="@style/BasicTextTheme"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                app:layout_constraintStart_toStartOf="parent"
+                android:gravity="center"
+                app:layout_constraintTop_toBottomOf="@id/popularity_ll"
+                app:layout_constraintBottom_toTopOf="@id/icon_ll">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/year_of"
+                        android:theme="@style/BasicBoldTheme"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/publication"
+                        android:theme="@style/BasicBoldTheme"/>
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/year_of_publication"
+                    android:theme="@style/BasicTextTheme"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/icon_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/favorite">
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
                 <LinearLayout
+                    android:id="@+id/favorite"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
@@ -64,10 +120,11 @@
                         android:layout_height="20dp"
                         android:src="@drawable/not_favorite"/>
                     <TextView
+                        android:id="@+id/favorite_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:theme="@style/BasicTextTheme"
-                        android:text="@string/favorite"/>
+                        android:text="@string/unfavorite_text"/>
                 </LinearLayout>
                 <LinearLayout
                     android:id="@+id/read"
@@ -85,13 +142,14 @@
                         android:layout_height="20dp"
                         android:src="@drawable/not_read"/>
                     <TextView
+                        android:id="@+id/read_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:theme="@style/BasicTextTheme"
-                        android:text="@string/read"/>
+                        android:text="@string/unread_text"/>
                 </LinearLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <ImageView
             android:id="@+id/cover_image"
             android:layout_width="0dp"
