@@ -1,9 +1,10 @@
-package com.example.mangashelf.presentation.views
+package com.example.mangashelf.presentation.views.adapters
 
 import android.content.Context
-import android.util.Log
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import coil.load
@@ -11,11 +12,20 @@ import com.example.mangashelf.R
 import com.example.mangashelf.databinding.MangaGroupsHeadingLayoutBinding
 import com.example.mangashelf.databinding.MangaItemLayoutBinding
 import com.example.mangashelf.domain.models.MangaItem
+import com.example.mangashelf.presentation.viewModels.HomeScreenViewModel
+import com.example.mangashelf.presentation.views.activities.MangaDetailedActivity
 import com.example.mangashelf.utils.TimeUtils
 
 class MangaListAdapter(
-    private val context: Context, private val adapterList: List<Any>
+    private val context: Context,
+    private val adapterList: List<Any>,
+    private val homeScreenViewModel: HomeScreenViewModel,
+    private val activityResultLauncher: ActivityResultLauncher<Intent>
 ) : RecyclerView.Adapter<ViewHolder>() {
+    companion object {
+        const val POSITION = "position"
+    }
+
     private val VIEW_TYPE_HEADING = 0
     private val VIEW_TYPE_ITEM = 1
 
@@ -43,6 +53,9 @@ class MangaListAdapter(
             (holder as MangaItemViewHolder).apply {
                 mangaItemLayoutBinding.apply {
                     val mangaItem = adapterList[position] as MangaItem
+                    coverImage.load(mangaItem.image) {
+                        crossfade(true)
+                    }
                     title.text = mangaItem.title
                     score.text = context.getString(R.string.manga_score, mangaItem.score)
                     popularity.text = context.getString(R.string.popularity, mangaItem.popularity)
@@ -50,11 +63,31 @@ class MangaListAdapter(
                         R.string.year_of_publication,
                         TimeUtils.convertUnixToYear(mangaItem.publishedChapterDate)
                     )
-                    coverImage.load(mangaItem.image) {
-                        crossfade(true)
+                    if (mangaItem.isFavorite) favoriteIcon.setImageResource(R.drawable.favorite)
+                    else favoriteIcon.setImageResource(R.drawable.not_favorite)
+                    if (mangaItem.isRead) readIcon.setImageResource(R.drawable.read)
+                    else readIcon.setImageResource(R.drawable.not_read)
+                    favorite.setOnClickListener {
+                        mangaItem.isFavorite = !mangaItem.isFavorite
+                        if (mangaItem.isFavorite) favoriteIcon.setImageResource(R.drawable.favorite)
+                        else favoriteIcon.setImageResource(R.drawable.not_favorite)
+                        homeScreenViewModel.updateFavoriteStatus(mangaItem.id, mangaItem.isFavorite)
+                    }
+                    read.setOnClickListener {
+                        mangaItem.isRead = !mangaItem.isRead
+                        if (mangaItem.isRead) readIcon.setImageResource(R.drawable.read)
+                        else readIcon.setImageResource(R.drawable.not_read)
+                        homeScreenViewModel.updateReadStatus(mangaItem.id, mangaItem.isRead)
+                    }
+                    root.setOnClickListener {
+                        activityResultLauncher.launch(Intent(
+                            holder.itemView.context, MangaDetailedActivity::class.java
+                        ).apply {
+                            putExtra(MangaDetailedActivity.MANGA_ITEM, mangaItem)
+                            putExtra(POSITION, position)
+                        })
                     }
                 }
-
             }
         }
     }

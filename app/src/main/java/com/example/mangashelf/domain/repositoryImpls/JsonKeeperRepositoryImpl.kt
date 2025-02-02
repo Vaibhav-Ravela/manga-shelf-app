@@ -12,8 +12,6 @@ class JsonKeeperRepositoryImpl @Inject constructor(
 ) : JsonKeeperRepository {
     override suspend fun getMangaList(): List<MangaItem> {
         val remoteMangaList = jsonKeeperAPIService.getMangaList()
-
-        mangaDBRepository.updateAllMangaItems(remoteMangaList)
-        return remoteMangaList
+        return mangaDBRepository.updateAllMangaItems(remoteMangaList)
     }
 }

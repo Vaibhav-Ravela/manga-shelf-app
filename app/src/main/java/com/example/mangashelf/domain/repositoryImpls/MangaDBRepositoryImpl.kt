@@ -18,33 +18,46 @@ class MangaDBRepositoryImpl @Inject constructor(private val mangaDao: MangaDao) 
                 title = it.title,
                 publishedChapterDate = it.publishedChapterDate,
                 category = it.category,
-                isFavorite = it.isFavorite
+                isFavorite = it.isFavorite,
+                isRead = it.isRead
             )
         }
 
-    override suspend fun updateAllMangaItems(newMangaList: List<MangaItem>) {
+    override suspend fun updateAllMangaItems(newMangaList: MutableList<MangaItem>) : List<MangaItem> {
         mangaDao.apply {
-            val oldMangaItemsFavoriteStatus = HashMap<String, Boolean>()
+            val oldMangaItemsFavoriteAndReadStatus = HashMap<String, Pair<Boolean, Boolean>>()
             mangaDao.getAllMangaItems().forEach {
-                oldMangaItemsFavoriteStatus[it.id] = it.isFavorite
+                oldMangaItemsFavoriteAndReadStatus[it.id] = Pair(it.isFavorite, it.isRead)
             }
             deleteAllMangaItems()
-            insertAllMangaItems(newMangaList.map {
-                MangaEntity(
-                    id = it.id,
-                    image = it.image,
-                    score = it.score,
-                    popularity = it.popularity,
-                    title = it.title,
-                    publishedChapterDate = it.publishedChapterDate,
-                    category = it.category,
-                    isFavorite = oldMangaItemsFavoriteStatus[it.id] ?: false
-                )
-            })
+            val mangaEntityList = mutableListOf<MangaEntity>()
+            for (mangaItem in newMangaList) {
+                mangaItem.let {
+                    it.isFavorite = oldMangaItemsFavoriteAndReadStatus[it.id]?.first ?: false
+                    it.isRead = oldMangaItemsFavoriteAndReadStatus[it.id]?.second ?: false
+                    mangaEntityList.add((MangaEntity(
+                        id = it.id,
+                        image = it.image,
+                        score = it.score,
+                        popularity = it.popularity,
+                        title = it.title,
+                        publishedChapterDate = it.publishedChapterDate,
+                        category = it.category,
+                        isFavorite = it.isFavorite,
+                        isRead = it.isRead
+                    )))
+                }
+            }
+            insertAllMangaItems(mangaEntityList)
+            return newMangaList
         }
     }
 
     override suspend fun updateMangaItemFavorite(id: String, isFavorite: Boolean) {
         mangaDao.updateMangaItemFavorite(id, isFavorite)
+    }
+
+    override suspend fun updateMangaItemRead(id: String, isRead: Boolean) {
+        mangaDao.updateMangaItemRead(id, isRead)
     }
 }

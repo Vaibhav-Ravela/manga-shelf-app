@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mangashelf.data.local.repositories.MangaDBRepository
 import com.example.mangashelf.data.remote.repositories.JsonKeeperRepository
+import com.example.mangashelf.domain.models.CurrentSortOption
 import com.example.mangashelf.domain.models.MangaItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +20,7 @@ class HomeScreenViewModel @Inject constructor(
     private val mangaDBRepository: MangaDBRepository
 ): ViewModel() {
     val mangaListLiveData = MutableLiveData<List<MangaItem>>()
+    var currentSortOption = CurrentSortOption.PUBLICATION_YEAR
 
     fun getMangaList() {
         viewModelScope.launch {
@@ -28,6 +30,30 @@ class HomeScreenViewModel @Inject constructor(
                 } catch (e: Exception) {
                     Log.e("HomeScreenViewModel", "Exception: ${e.printStackTrace()}")
                     mangaDBRepository.getAllMangaItems()
+                }
+            }
+        }
+    }
+
+    fun updateFavoriteStatus(id: String, isFavorite: Boolean) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    mangaDBRepository.updateMangaItemFavorite(id, isFavorite)
+                } catch (e: Exception) {
+                    Log.e("HomeScreenViewModel", "Exception: ${e.printStackTrace()}")
+                }
+            }
+        }
+    }
+
+    fun updateReadStatus(id: String, isRead: Boolean) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    mangaDBRepository.updateMangaItemRead(id, isRead)
+                } catch (e: Exception) {
+                    Log.e("HomeScreenViewModel", "Exception: ${e.printStackTrace()}")
                 }
             }
         }

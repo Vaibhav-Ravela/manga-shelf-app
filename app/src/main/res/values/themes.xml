@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.MangaShelf" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.MangaShelf" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
@@ -19,13 +19,13 @@
     <style name="TextHeadingTheme" parent="TextTheme">
         <item name="android:textStyle">bold</item>
     </style>
-    <style name="MangaGroupHeadingTheme" parent="TextHeadingTheme">
+    <style name="HeadingTheme" parent="TextHeadingTheme">
         <item name="android:textSize">20sp</item>
     </style>
-    <style name="MangaItemTitleTheme" parent="TextHeadingTheme">
+    <style name="SubHeadingTheme" parent="TextHeadingTheme">
         <item name="android:textSize">18sp</item>
     </style>
-    <style name="MangaItemDetailsTheme" parent="TextTheme">
+    <style name="BasicTextTheme" parent="TextTheme">
         <item name="android:textSize">14sp</item>
     </style>
 </resources>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/sort_by_heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="@string/sort_by"
+        android:theme="@style/HeadingTheme"
+        android:layout_margin="10dp"/>
+
+    <View
+        android:id="@+id/line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#cdced4"
+        android:layout_marginVertical="10dp"
+        app:layout_constraintTop_toBottomOf="@id/sort_by_heading"/>
+
+    <TextView
+        android:id="@+id/publication_year"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        app:layout_constraintTop_toBottomOf="@id/line"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/publication_year_low_to_high"
+        android:theme="@style/BasicTextTheme" />
+
+    <TextView
+        android:id="@+id/score_low_to_high"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/publication_year"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/score_low_to_high"
+        android:theme="@style/BasicTextTheme"
+        android:padding="10dp"/>
+
+    <TextView
+        android:id="@+id/score_high_to_low"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/score_low_to_high"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/score_high_to_low"
+        android:theme="@style/BasicTextTheme"
+        android:padding="10dp"/>
+
+    <TextView
+        android:id="@+id/popularity_low_to_high"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/score_high_to_low"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/popularity_low_to_high"
+        android:theme="@style/BasicTextTheme"
+        android:padding="10dp"/>
+
+    <TextView
+        android:id="@+id/popularity_high_to_low"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/popularity_low_to_high"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="@string/popularity_high_to_low"
+        android:theme="@style/BasicTextTheme"
+        android:padding="10dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -18,4 +18,7 @@ interface MangaDao {
 
     @Query("UPDATE `Manga Items` SET isFavorite = :isFavorite WHERE id = :id")
     fun updateMangaItemFavorite(id: String, isFavorite: Boolean)
+
+    @Query("UPDATE `Manga Items` SET isRead = :isRead WHERE id = :id")
+    fun updateMangaItemRead(id: String, isRead: Boolean)
 }
