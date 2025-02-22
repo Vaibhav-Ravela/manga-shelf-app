@@ -24,6 +24,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".presentation.views.activities.MangaDetailedActivity"/>
+        <activity android:name=".presentation.views.activities.DummyActivity"/>
     </application>
 
 </manifest>

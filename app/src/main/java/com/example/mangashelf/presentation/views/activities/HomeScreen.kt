@@ -1,205 +1,197 @@
 package com.example.mangashelf.presentation.views.activities
 
-import android.graphics.Typeface
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.mangashelf.databinding.BottomSheetSortingLayoutBinding
-import com.example.mangashelf.databinding.HomeScreenBinding
-import com.example.mangashelf.domain.models.CurrentSortOption
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.example.mangashelf.domain.models.MangaItem
+import com.example.mangashelf.domain.models.ResultState
 import com.example.mangashelf.presentation.viewModels.HomeScreenViewModel
-import com.example.mangashelf.presentation.views.adapters.MangaListAdapter
 import com.example.mangashelf.utils.TimeUtils
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.tabs.TabLayout
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
-class HomeScreen : AppCompatActivity() {
-    private lateinit var homeScreenViewModel: HomeScreenViewModel
-    private lateinit var homeScreenBinding: HomeScreenBinding
-    private var isProgrammaticSync = false
 
+@AndroidEntryPoint
+class HomeScreen : ComponentActivity() {
+    private val homeScreenViewModel: HomeScreenViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        homeScreenBinding = HomeScreenBinding.inflate(layoutInflater)
-        setContentView(homeScreenBinding.root)
-        homeScreenViewModel = ViewModelProvider(this)[HomeScreenViewModel::class.java]
-        homeScreenBinding.mangaItemsRv.layoutManager = LinearLayoutManager(this)
-        if (homeScreenViewModel.currentSortOption == CurrentSortOption.PUBLICATION_YEAR) homeScreenBinding.tabLayout.visibility =
-            View.VISIBLE
-        else homeScreenBinding.tabLayout.visibility = View.GONE
-        setupOnClickListeners()
-        homeScreenViewModel.mangaListLiveData.observe(this) {
-            homeScreenBinding.apply {
-                root.isRefreshing = false
-                progressBar.visibility = View.GONE
-                mainContent.visibility = View.VISIBLE
-                if (it.isNullOrEmpty()) {
-                    noData.visibility = View.VISIBLE
-                    mainContent.visibility = View.GONE
-                    return@observe
-                } else {
-                    noData.visibility = View.GONE
-                    mainContent.visibility = View.VISIBLE
-                }
-                homeScreenViewModel.readAdapterList(it.sortedBy { mangaItem -> mangaItem.publishedChapterDate })
-                tabLayout.removeAllTabs()
-                homeScreenViewModel.yearToIndexMap.keys.forEach { year ->
-                    homeScreenBinding.tabLayout.addTab(homeScreenBinding.tabLayout.newTab()
-                        .setText(year.toString()).apply { tag = year })
-                }
-                mangaItemsRv.adapter = MangaListAdapter(
-                    this@HomeScreen,
-                    provideAdapterList(it),
-                    homeScreenViewModel,
-                    mangaDetailedActivityResultLauncher
-                )
-            }
+        setContent {
+            HomeScreenUI(homeScreenViewModel)
         }
+    }
+}
+
+
+@Composable
+fun HomeScreenUI(homeScreenViewModel: HomeScreenViewModel) {
+    val mangaListStatus by homeScreenViewModel.mangaListStateFlow.collectAsState()
+    LaunchedEffect(Unit) {
         homeScreenViewModel.getMangaList()
     }
+    MangaItemList(LocalContext.current, mangaListStatus = mangaListStatus)
+}
 
-    private fun setupOnClickListeners() {
-        homeScreenBinding.root.setOnRefreshListener {
-            homeScreenViewModel.getMangaList()
-        }
-        homeScreenBinding.tabLayout.addOnTabSelectedListener(object :
-            TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                if (isProgrammaticSync) return
-                else isProgrammaticSync = true
-                (tab?.tag as? Int)?.let {
-                    homeScreenBinding.mangaItemsRv.apply {
-                        stopScroll()
-                        (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                            homeScreenViewModel.yearToIndexMap.getOrDefault(it, 0), 0
-                        )
-                    }
-                }
+@Composable
+fun MangaItemList(
+    context: Context, mangaListStatus: ResultState<List<MangaItem>> = ResultState.Success(
+        listOf(
+            MangaItem(
+                "4e70e91ac092255ef70016d6",
+                "https://cdn.myanimelist.net/images/anime/6/73245.jpg",
+                16.5.toFloat(),
+                165588,
+                "Neon Genesis Evangelion: Shinji Ikari Raising Project",
+                1275542373,
+                "Comedy",
+                isFavorite = false,
+                isRead = false
+            ), MangaItem(
+                "4e70e91ac092255ef70016d6",
+                "https://cdn.myanimelist.net/images/anime/6/73245.jpg",
+                16.5.toFloat(),
+                165588,
+                "Neon Genesis Evangelion: Shinji Ikari Raising Project",
+                1275542373,
+                "Comedy",
+                isFavorite = false,
+                isRead = false
+            ), MangaItem(
+                "4e70e91ac092255ef70016d6",
+                "https://cdn.myanimelist.net/images/anime/6/73245.jpg",
+                16.5.toFloat(),
+                165588,
+                "Neon Genesis Evangelion: Shinji Ikari Raising Project",
+                1275542373,
+                "Comedy",
+                isFavorite = false,
+                isRead = false
+            )
+        )
+    )
+) {
+    LazyColumn {
+        if (mangaListStatus == ResultState.Loading) {
+            items(3) {
+                MangaItemLayout(mangaItem = null, context = context)
             }
+        } else if (mangaListStatus is ResultState.Success) {
+            items(mangaListStatus.data.size) { item ->
+                MangaItemLayout(mangaItem = mangaListStatus.data[item], context = context)
+            }
+        }
+    }
+}
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-        })
-        homeScreenBinding.mangaItemsRv.addOnScrollListener(object :
-            RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (homeScreenViewModel.currentSortOption != CurrentSortOption.PUBLICATION_YEAR) return
-                if (isProgrammaticSync) {
-                    isProgrammaticSync = false
-                    return
-                } else isProgrammaticSync = true
-                val firstVisibleItemPosition =
-                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                val year = when (val firstVisibleItem =
-                    homeScreenViewModel.yearSortedAdapterList[firstVisibleItemPosition]) {
-                    is Int -> firstVisibleItem
-                    is MangaItem -> TimeUtils.convertUnixToYear(firstVisibleItem.publishedChapterDate)
-                        .toInt()
-
-                    else -> {}
-                }
-                homeScreenBinding.tabLayout.getTabAt(
-                    homeScreenViewModel.yearToIndexMap.keys.indexOf(
-                        year
+@Composable
+fun MangaItemLayout(
+    context: Context, mangaItem: MangaItem?
+) {
+    var isImageLoading by remember { mutableStateOf(true) }
+    val painter = rememberAsyncImagePainter(model = mangaItem?.image, onState = { state ->
+        if (state is coil.compose.AsyncImagePainter.State.Success) isImageLoading = false
+    })
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .padding(10.dp)
+        .clickable {
+            context.startActivity(Intent(context, DummyActivity::class.java))
+        }) {
+        Box(
+            modifier = Modifier
+                .width(180.dp)
+                .height(280.dp)
+        ) {
+            Image(
+                painter = painter,
+                contentDescription = "Manga Icon",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.Center)
+                    .placeholder(
+                        visible = isImageLoading,
+                        highlight = PlaceholderHighlight.shimmer(highlightColor = Color.Gray),
+                        color = Color.White
                     )
-                )?.select()
-                isProgrammaticSync = false
-            }
-        })
-        homeScreenBinding.sortBtn.setOnClickListener {
-            val bottomSheetBinding = BottomSheetSortingLayoutBinding.inflate(layoutInflater)
-            val dialog = BottomSheetDialog(this).apply {
-                setContentView(bottomSheetBinding.root)
-                show()
-            }
-            when (homeScreenViewModel.currentSortOption) {
-                CurrentSortOption.PUBLICATION_YEAR -> bottomSheetBinding.publicationYear.setTypeface(
-                    null, Typeface.BOLD
-                )
-
-                CurrentSortOption.SCORE_LOW_TO_HIGH -> bottomSheetBinding.scoreLowToHigh.setTypeface(
-                    null, Typeface.BOLD
-                )
-
-                CurrentSortOption.SCORE_HIGH_TO_LOW -> bottomSheetBinding.scoreHighToLow.setTypeface(
-                    null, Typeface.BOLD
-                )
-
-                CurrentSortOption.POPULARITY_LOW_TO_HIGH -> bottomSheetBinding.popularityLowToHigh.setTypeface(
-                    null, Typeface.BOLD
-                )
-
-                CurrentSortOption.POPULARITY_HIGH_TO_LOW -> bottomSheetBinding.popularityHighToLow.setTypeface(
-                    null, Typeface.BOLD
-                )
-            }
-            setupClickListeners(bottomSheetBinding, dialog)
-        }
-    }
-
-    private fun provideAdapterList(mangaItemList: List<MangaItem>): MutableList<Any> {
-        return when (homeScreenViewModel.currentSortOption) {
-            CurrentSortOption.PUBLICATION_YEAR -> homeScreenViewModel.yearSortedAdapterList
-            CurrentSortOption.SCORE_LOW_TO_HIGH -> mangaItemList.sortedBy { it.score }
-                .toMutableList()
-
-            CurrentSortOption.SCORE_HIGH_TO_LOW -> mangaItemList.sortedByDescending { it.score }
-                .toMutableList()
-
-            CurrentSortOption.POPULARITY_LOW_TO_HIGH -> mangaItemList.sortedBy { it.popularity }
-                .toMutableList()
-
-            CurrentSortOption.POPULARITY_HIGH_TO_LOW -> mangaItemList.sortedByDescending { it.popularity }
-                .toMutableList()
-        }
-    }
-
-    private fun setupClickListeners(
-        bottomSheetSortingLayoutBinding: BottomSheetSortingLayoutBinding, dialog: BottomSheetDialog
-    ) {
-        val list = with(bottomSheetSortingLayoutBinding) {
-            listOf(
-                publicationYear,
-                scoreLowToHigh,
-                scoreHighToLow,
-                popularityLowToHigh,
-                popularityHighToLow
             )
         }
-        for (i in list.indices) {
-            list[i].setOnClickListener {
-                if (i != 0) homeScreenBinding.tabLayout.visibility = View.GONE
-                else homeScreenBinding.tabLayout.visibility = View.VISIBLE
-                homeScreenViewModel.currentSortOption = CurrentSortOption.entries[i]
-                if (homeScreenViewModel.mangaListLiveData.value.isNullOrEmpty()) return@setOnClickListener
-                homeScreenBinding.mangaItemsRv.adapter = MangaListAdapter(
-                    this@HomeScreen,
-                    provideAdapterList(homeScreenViewModel.mangaListLiveData.value!!),
-                    homeScreenViewModel,
-                    mangaDetailedActivityResultLauncher
-                )
-                dialog.dismiss()
-            }
+        Column(
+            verticalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.height(280.dp)
+        ) {
+            Text(
+                text = mangaItem?.title ?: "",
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                style = TextStyle(textDecoration = TextDecoration.Underline),
+                fontSize = 15.sp,
+                fontFamily = FontFamily.Serif,
+                modifier = Modifier.padding(10.dp)
+            )
+            Text(text = mangaItem?.score?.let { "Score: $it" } ?: "",
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                fontSize = 15.sp,
+                fontFamily = FontFamily.Serif,
+                modifier = Modifier.padding(10.dp))
+            Text(text = mangaItem?.popularity?.let { "Popularity: $it" } ?: "",
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                fontSize = 15.sp,
+                fontFamily = FontFamily.Serif,
+                modifier = Modifier.padding(10.dp))
+            Text(text = mangaItem?.publishedChapterDate?.let {
+                "YOP: ${
+                    TimeUtils.convertUnixToYear(
+                        mangaItem.publishedChapterDate
+                    )
+                }"
+            } ?: "",
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                fontFamily = FontFamily.Serif,
+                modifier = Modifier.padding(10.dp))
+            Text(text = mangaItem?.category?.let { "Category: $it" } ?: "",
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                fontFamily = FontFamily.Serif,
+                modifier = Modifier.padding(10.dp))
         }
     }
-
-    private val mangaDetailedActivityResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                val position = it.data?.getIntExtra(MangaListAdapter.POSITION, -1)
-                if (position != null && position != -1) {
-                    (homeScreenBinding.mangaItemsRv.adapter as MangaListAdapter).adapterList[position] =
-                        it.data?.getParcelableExtra<MangaItem>(MangaDetailedActivity.MANGA_ITEM)!!
-                    homeScreenBinding.mangaItemsRv.adapter?.notifyItemChanged(position)
-                }
-            }
-        }
 }

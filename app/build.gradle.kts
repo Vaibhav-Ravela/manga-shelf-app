@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
-    id("com.google.devtools.ksp")
     id("kotlin-parcelize")
 }
 
@@ -40,6 +39,12 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.0"
+    }
 }
 
 dependencies {
@@ -47,10 +52,16 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.hilt.android)
+    debugImplementation(libs.androidx.ui.tooling)
     kapt(libs.hilt.android.compiler)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
@@ -61,6 +72,10 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.coil)
     implementation(libs.androidx.swiperefreshlayout)
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.accompanist.placeholder.material)
+
 }
 
 kapt {

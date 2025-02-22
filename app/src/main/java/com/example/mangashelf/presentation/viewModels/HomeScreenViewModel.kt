@@ -1,16 +1,16 @@
 package com.example.mangashelf.presentation.viewModels
 
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mangashelf.data.local.repositories.MangaDBRepository
 import com.example.mangashelf.data.remote.repositories.JsonKeeperRepository
-import com.example.mangashelf.domain.models.CurrentSortOption
 import com.example.mangashelf.domain.models.MangaItem
+import com.example.mangashelf.domain.models.ResultState
 import com.example.mangashelf.utils.TimeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -20,19 +20,20 @@ class HomeScreenViewModel @Inject constructor(
     private val jsonKeeperRepository: JsonKeeperRepository,
     private val mangaDBRepository: MangaDBRepository
 ) : ViewModel() {
-    val mangaListLiveData = MutableLiveData<List<MangaItem>>()
-    var currentSortOption = CurrentSortOption.PUBLICATION_YEAR
-    val yearToIndexMap = HashMap<Int, Int>()
-    val yearSortedAdapterList = ArrayList<Any>()
+
+    val mangaListStateFlow: MutableStateFlow<ResultState<List<MangaItem>>> =
+        MutableStateFlow(ResultState.Loading)
 
     fun getMangaList() {
         viewModelScope.launch {
-            mangaListLiveData.value = withContext(Dispatchers.IO) {
+            mangaListStateFlow.value = withContext(Dispatchers.IO) {
                 try {
-                    jsonKeeperRepository.getMangaList()
+                    ResultState.Success(jsonKeeperRepository.getMangaList())
                 } catch (e: Exception) {
                     Log.e("HomeScreenViewModel", "Exception: ${e.printStackTrace()}")
-                    mangaDBRepository.getAllMangaItems()
+                    val dbList = mangaDBRepository.getAllMangaItems()
+                    if (dbList.isEmpty()) ResultState.Error("Something went wrong")
+                    else ResultState.Success(dbList)
                 }
             }
         }
@@ -59,24 +60,6 @@ class HomeScreenViewModel @Inject constructor(
                     Log.e("HomeScreenViewModel", "Exception: ${e.printStackTrace()}")
                 }
             }
-        }
-    }
-
-    fun readAdapterList(mangaItemList: List<MangaItem>) {
-        yearSortedAdapterList.clear()
-        yearToIndexMap.clear()
-        var prevYear = TimeUtils.convertUnixToYear(mangaItemList[0].publishedChapterDate)
-        yearSortedAdapterList.add(prevYear.toInt())
-        yearToIndexMap[prevYear.toInt()] = yearSortedAdapterList.size - 1
-        yearSortedAdapterList.add(mangaItemList[0])
-        for (i in 1..<mangaItemList.size) {
-            val currentYear = TimeUtils.convertUnixToYear(mangaItemList[i].publishedChapterDate)
-            if (prevYear != currentYear) {
-                prevYear = currentYear
-                yearSortedAdapterList.add(prevYear.toInt())
-                yearToIndexMap[prevYear.toInt()] = yearSortedAdapterList.size - 1
-            }
-            yearSortedAdapterList.add(mangaItemList[i])
         }
     }
 }
